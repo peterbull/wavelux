@@ -15,12 +15,6 @@ fn main() {
 #[component]
 fn App() -> Element {
     println!("Hello, world!");
-    let audio = use_signal(|| {
-        let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-            .expect("open default audio stream");
-        let sink = rodio::Sink::connect_new(&stream_handle.mixer());
-        (sink, stream_handle)
-    });
     rsx! {
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         Keys {}
