@@ -3,4 +3,6 @@
 //! component  to be used in our app.
 
 mod hero;
+mod keys;
 pub use hero::Hero;
+pub use keys::Keys;
