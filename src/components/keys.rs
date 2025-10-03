@@ -8,29 +8,43 @@ pub fn Keys() -> Element {
         let sink = rodio::Sink::connect_new(&stream_handle.mixer());
         Ok::<_, Box<dyn std::error::Error>>((stream_handle, sink))
     });
-    let handlePlayKey = move |note: StdScale| {
+    let handle_play_key = move |note: StdScale| {
         if let Some(Ok((_stream_handle, sink))) = audio.read().as_ref() {
             play_sine_note(sink, note, Some(0.25));
         }
     };
     rsx! {
-        div { id: "keys",
+        div {
+            id: "keys",
+            tabindex: "0",
+            onkeydown: move |event| {
+                let key = event.key();
+                match key {
+                    Key::Character(ch) => {
+                        match ch.as_str() {
+                            "a" => handle_play_key(StdScale::C4),
+                            _ => println!("other char"),
+                        }
+                    }
+                    _ => println!("other key"),
+                }
+            },
             div {
                 class: "key",
-                onclick: move |_event| { handlePlayKey(StdScale::C4) },
+                onclick: move |_event| { handle_play_key(StdScale::C4) },
                 p { "C" }
             }
             div {
                 class: "key",
                 onclick: move |_event| {
-                    handlePlayKey(StdScale::D4);
+                    handle_play_key(StdScale::D4);
                 },
                 p { "D" }
             }
             div {
                 class: "key",
                 onclick: move |_event| {
-                    handlePlayKey(StdScale::E4);
+                    handle_play_key(StdScale::E4);
                 },
                 p { "E" }
             }
