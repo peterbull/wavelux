@@ -65,8 +65,10 @@ pub fn play_sine_note(sink: &rodio::Sink, note: StdScale, sustain: Option<f32>) 
     let source = SineWave::new(note.frequency())
         .take_duration(Duration::from_secs_f32(sustain))
         .amplify(0.40);
+    println!("clearing sink");
+    sink.clear();
+    println!("loading to sink");
     sink.append(source);
-    println!("in sine note trying to play");
     if sink.is_paused() {
         sink.play();
     }

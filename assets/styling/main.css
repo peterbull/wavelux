@@ -42,14 +42,58 @@ body {
 }
 
 #keys {
+  user-select: none;
+  cursor: pointer;
   display: flex;
-  justify-content: ;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  --white-key-width: min(100px, calc(100vw / 7) - 4px);
+  --white-key-height: calc(var(--white-key-width) * 5);
+  --key-border-radis: 0 0 7px 7px;
 }
 
 .key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  box-sizing: border-box;
   border-style: solid;
-  border-width: 1px;
-  border-color: white;
-  width: 100px;
-  height: 500px;
+  border-width: 2px;
+  border-color: black;
+  width: var(--white-key-width);
+  height: var(--white-key-height);
+  background-color: white;
+  border-radius: var(--key-border-radis);
+}
+
+.key p {
+  text-align: center;
+  color: black;
+}
+
+.key-sharp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  z-index: 10;
+  /* position: absolute; */
+  box-sizing: border-box;
+  width: calc(var(--white-key-width) * 0.6);
+  height: calc(var(--white-key-height) * 0.64);
+  margin-left: calc((var(--white-key-width) * 0.6) / -2);
+  margin-right: calc((var(--white-key-width) * 0.6) / -2);
+  /* transform: translateX(-50%); */
+  border-style: solid;
+  border-width: 2px;
+  background-color: black;
+  border-color: black;
+  border-radius: var(--key-border-radis);
+}
+
+.key-sharp p {
+  text-align: center;
+  color: white;
 }
