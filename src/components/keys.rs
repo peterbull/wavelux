@@ -33,7 +33,7 @@ pub fn Keys() -> Element {
                             "k" => handle_play_key(StdScale::C5),
                             "l" => handle_play_key(StdScale::D5),
                             "w" => handle_play_key(StdScale::CSharp4),
-                            "e" => handle_play_key(StdScale::EFlat4),
+                            "e" => handle_play_key(StdScale::DSharp4),
                             "t" => handle_play_key(StdScale::FSharp4),
                             "y" => handle_play_key(StdScale::GSharp4),
                             "u" => handle_play_key(StdScale::BFlat4),
@@ -61,6 +61,13 @@ pub fn Keys() -> Element {
                 p { "D" }
             }
             div {
+                class: "key-sharp",
+                onclick: move |_event| {
+                    handle_play_key(StdScale::DSharp4);
+                },
+                p { "D#" }
+            }
+            div {
                 class: "key",
                 onclick: move |_event| {
                     handle_play_key(StdScale::E4);
@@ -75,6 +82,13 @@ pub fn Keys() -> Element {
                 p { "F" }
             }
             div {
+                class: "key-sharp",
+                onclick: move |_event| {
+                    handle_play_key(StdScale::FSharp4);
+                },
+                p { "F#" }
+            }
+            div {
                 class: "key",
                 onclick: move |_event| {
                     handle_play_key(StdScale::G4);
@@ -82,11 +96,25 @@ pub fn Keys() -> Element {
                 p { "G" }
             }
             div {
+                class: "key-sharp",
+                onclick: move |_event| {
+                    handle_play_key(StdScale::GSharp4);
+                },
+                p { "G#" }
+            }
+            div {
                 class: "key",
                 onclick: move |_event| {
                     handle_play_key(StdScale::A4);
                 },
                 p { "A" }
+            }
+            div {
+                class: "key-sharp",
+                onclick: move |_event| {
+                    handle_play_key(StdScale::BFlat4);
+                },
+                p { "Bb" }
             }
             div {
                 class: "key",
