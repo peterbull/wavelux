@@ -1,4 +1,4 @@
-use rodio::source::{SineWave, Source};
+use rodio::source::{SawtoothWave, SineWave, Source};
 use std::time::Duration;
 use rand::{self, Rng};
 use strum::IntoEnumIterator;
@@ -65,6 +65,7 @@ pub fn play_sine_note(sink: &rodio::Sink, note: StdScale, sustain: Option<f32>) 
     let source = SineWave::new(note.frequency())
         .take_duration(Duration::from_secs_f32(sustain))
         .amplify(0.40);
+
     println!("clearing sink");
     sink.clear();
     println!("loading to sink");

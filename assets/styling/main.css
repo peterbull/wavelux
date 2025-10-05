@@ -1,44 +1,39 @@
+:root {
+  --base-key-width: min(100px, calc(100vw / 7) - 4px);
+  --base-key-height: calc(var(--base-key-width) * 5);
+  --key-border-radis: 0 0 7px 7px;
+
+  --primary-dark: #2A2A2A;
+  --primary-warm: #8B4513;
+  --accent-red: #FF4444;
+  --accent-amber: #FFB000;
+
+  --text-light: #CCCCCC;
+  --text-bright: #F5F5F5;
+  --surface-light: #E6E6E6;
+  --shadow-deep: #1A1A1A;
+}
+
 body {
-  background-color: #0f1116;
-  color: #ffffff;
+  background-color: var(--shadow-deep);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 20px;
-}
-
-#hero {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#links {
-  width: 400px;
-  text-align: left;
-  font-size: x-large;
-  color: white;
-  display: flex;
-  flex-direction: column;
-}
-
-#links a {
-  color: white;
-  text-decoration: none;
-  margin-top: 20px;
-  margin: 10px 0px;
-  border: white 1px solid;
-  border-radius: 5px;
-  padding: 10px;
-}
-
-#links a:hover {
-  background-color: #1f1f1f;
-  cursor: pointer;
 }
 
 #header {
   max-width: 1200px;
+}
+
+.keyboard-container {
+  display: grid;
+  justify-content: center;
+}
+
+#keyboard {}
+
+#controls {
+  min-height: 100px;
+  background-color: var(--primary-warm);
+  border: 1px solid var(--text-light);
 }
 
 #keys {
@@ -48,9 +43,7 @@ body {
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  --white-key-width: min(100px, calc(100vw / 7) - 4px);
-  --white-key-height: calc(var(--white-key-width) * 5);
-  --key-border-radis: 0 0 7px 7px;
+
 }
 
 .key {
@@ -61,11 +54,11 @@ body {
   box-sizing: border-box;
   border-style: solid;
   border-width: 2px;
-  border-color: black;
-  width: var(--white-key-width);
-  height: var(--white-key-height);
+  width: var(--base-key-width);
+  height: var(--base-key-height);
   background-color: white;
   border-radius: var(--key-border-radis);
+  border-color: var(--shadow-deep);
 }
 
 .key p {
@@ -79,21 +72,24 @@ body {
   align-items: center;
   justify-content: end;
   z-index: 10;
-  /* position: absolute; */
   box-sizing: border-box;
-  width: calc(var(--white-key-width) * 0.6);
-  height: calc(var(--white-key-height) * 0.64);
-  margin-left: calc((var(--white-key-width) * 0.6) / -2);
-  margin-right: calc((var(--white-key-width) * 0.6) / -2);
-  /* transform: translateX(-50%); */
+  width: calc(var(--base-key-width) * 0.6);
+  height: calc(var(--base-key-height) * 0.64);
+  margin-left: calc((var(--base-key-width) * 0.6) / -2);
+  margin-right: calc((var(--base-key-width) * 0.6) / -2);
   border-style: solid;
   border-width: 2px;
   background-color: black;
-  border-color: black;
   border-radius: var(--key-border-radis);
 }
 
 .key-sharp p {
   text-align: center;
   color: white;
+}
+
+.toggle-button {
+  fill: none;
+  stroke: var(--text-light);
+  stroke-width: 1;
 }
