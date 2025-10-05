@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
 use crate::{
-    audio::{play_sine_note, StdScale},
+    audio::{play_sine_note, StdScale, Waveform},
     components::ToggleButton,
 };
 #[component]
 pub fn Keys() -> Element {
+    let mut wave_type = use_signal(|| Waveform::Sine);
     let audio = use_resource(|| async {
         let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
             .expect("open default audio stream");
@@ -14,15 +15,25 @@ pub fn Keys() -> Element {
     let handle_play_key = move |note: StdScale| {
         if let Some(Ok((_stream_handle, sink))) = audio.read().as_ref() {
             println!("playing key in sink: {:#?}", sink.len());
-            play_sine_note(sink, note, Some(0.1));
+            play_sine_note(sink, note, Some(0.4), Some(*wave_type.read()));
         }
     };
     rsx! {
-        // why
-        //
-        // button { class: "control-toggle", "toggle qwerty keys" }
         div { class: "keyboard-container",
-            div { id: "controls", ToggleButton {} }
+            div { id: "controls",
+                ToggleButton {}
+                button {
+                    onclick: move |_event| {
+                        let current = *wave_type.read();
+                        let new_wave = match *wave_type.read() {
+                            Waveform::Sine => Waveform::Saw,
+                            Waveform::Saw => Waveform::Sine,
+                        };
+                        wave_type.set(new_wave);
+                    },
+                    "temp toggle"
+                }
+            }
             div {
                 id: "keys",
                 tabindex: "0",
