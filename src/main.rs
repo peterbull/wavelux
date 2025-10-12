@@ -1,4 +1,4 @@
-use audio::{play_sine_note, StdScale};
+use audio::{start_note, StdScale};
 use components::{Hero, Keys};
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;

@@ -1,4 +1,4 @@
-use rodio::source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration};
+use rodio::{source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration}, OutputStream};
 use std::time::Duration;
 use rand::{self, Rng};
 use strum::IntoEnumIterator;
@@ -67,7 +67,8 @@ pub enum Waveform {
   Saw
 }
 
-pub fn play_sine_note(sink: &rodio::Sink, note: StdScale, sustain: Option<f32>, wave_type: Option<Waveform>) {
+
+pub fn start_note(stream_handle: &OutputStream, note: StdScale, sustain: Option<f32>, wave_type: Option<Waveform>) {
     let sustain = sustain.unwrap_or(0.25);
     let wave_type = wave_type.unwrap_or(Waveform::Sine);
     let source: Box<dyn Source<Item = f32> + Send> =  match wave_type {
@@ -77,13 +78,6 @@ pub fn play_sine_note(sink: &rodio::Sink, note: StdScale, sustain: Option<f32>, 
     Waveform::Saw => Box::new(SawtoothWave::new(note.frequency())
         .take_duration(Duration::from_secs_f32(sustain))
         .amplify(0.5)),
-};
-    println!("clearing sink");
-    sink.clear();
-    println!("loading to sink");
-    sink.append(source);
-    if sink.is_paused() {
-        sink.play();
-    }
-    println!("finished playing");
+    };
+  stream_handle.mixer().add(source)
 }
