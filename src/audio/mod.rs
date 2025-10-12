@@ -1,9 +1,10 @@
-use rodio::{mixer, source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration}, OutputStream, Sink};
-use std::{collections::HashMap, thread::{self, sleep}, time::Duration};
+use rodio::{mixer, source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration, TriangleWave}, OutputStream, Sink};
+use core::fmt;
+use std::{collections::HashMap, fmt::Formatter, thread::{self, sleep}, time::Duration};
 use rand::{self, Rng};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-#[derive(Debug, EnumIter, PartialEq, Eq, Hash)]
+#[derive(Debug, EnumIter, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum StdScale {
     C4,
     CSharp4,
@@ -61,14 +62,27 @@ impl StdScale {
     }
 }
 
+
 #[derive(Debug, EnumIter, Copy, Clone)]
 pub enum Waveform {
   Sine,
-  Saw
+  Saw,
+  Triangle,
+}
+impl fmt::Display for Waveform {
+  fn fmt(&self, f: &mut fmt::Formatter)-> fmt::Result {
+    match self {
+      Waveform::Sine => write!(f, "Sine"),
+      Waveform::Saw => write!(f,"Saw"),
+      Waveform::Triangle => write!(f,"Triangle"),
+    }
+  }
+
 }
 
+
 pub struct AudioManager {
-    notes: HashMap<StdScale, Sink>,
+    notes: HashMap<StdScale, (Waveform, Sink)>,
     stream: OutputStream
 }
 
@@ -79,25 +93,50 @@ impl AudioManager {
         Self { stream, notes }
     }
 
-    pub fn start_note(&mut self, note: StdScale,  wave_type: Option<Waveform>) {
-        let sink = Sink::connect_new(&self.stream.mixer());
+ 
+    pub fn create_source(&self, frequency: f32, wave_type: &Waveform) -> Box<dyn Source<Item = f32> + Send> {
+        match wave_type {
+            Waveform::Sine => Box::new(
+                SineWave::new(frequency)
+                    .fade_in(Duration::from_millis(10))
+                    .amplify(0.15)
+            ),
+            Waveform::Saw => Box::new(
+                SawtoothWave::new(frequency)
+                    .fade_in(Duration::from_millis(10))
+                    .amplify(0.15)
+            ),
+            Waveform::Triangle => Box::new(
+                TriangleWave::new(frequency)
+                    .fade_in(Duration::from_millis(10))
+                    .amplify(0.15)
+            ),
+            Waveform::Triangle => Box::new(
+                        Pink::new(frequency)
+                            .fade_in(Duration::from_millis(10))
+                            .amplify(0.15)
+            ),
+        }
+    }
+
+    pub fn start_note(&mut self, note: StdScale,  wave_type: Option<Waveform>, sustain: Option<f32> ){
         let wave_type = wave_type.unwrap_or(Waveform::Sine);
-        let source: Box<dyn Source<Item = f32> + Send> = match wave_type {
-            Waveform::Sine => Box::new(SineWave::new(note.frequency())
-                .amplify(0.2)),
-            Waveform::Saw => Box::new(SawtoothWave::new(note.frequency())
-                .amplify(0.2)),
-        };
+        let frequency = note.frequency(); 
+        let mut source = self.create_source(frequency, &wave_type);
+        let sink = Sink::connect_new(&self.stream.mixer());
+        if let Some(duration) = sustain {
+          source = Box::new(source.take_duration(Duration::from_secs_f32(duration)))
+        }
         println!("adding source ___________________________________");
         sink.append(source);
-        if let Some(old_sink) = self.notes.insert(note, sink) {
+        if let Some((_, old_sink)) = self.notes.insert(note, (wave_type, sink)) {
             old_sink.stop();
         }
     }
     pub fn stop_note(&mut self, note: StdScale) {
-    if let Some(sink) = self.notes.get(&note) {
-      sink.stop()
-    }
+      if let Some((wave_type, sink)) = self.notes.get(&note) {
+        sink.stop();
+      }
   }
 }
 
