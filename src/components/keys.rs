@@ -1,3 +1,5 @@
+use std::collections::{hash_set, HashSet};
+
 use dioxus::prelude::*;
 use crate::{
     audio::{AudioManager, StdScale, Waveform},
@@ -25,17 +27,35 @@ fn key_to_note(key: &str) -> Option<StdScale> {
     }
 }
 
+const PIANO_KEYS: &[(StdScale, &str, &str)] = &[
+    (StdScale::C4, "key", "C"),
+    (StdScale::CSharp4, "key-sharp", "C#"),
+    (StdScale::D4, "key", "D"),
+    (StdScale::DSharp4, "key-sharp", "D#"),
+    (StdScale::E4, "key", "E"),
+    (StdScale::F4, "key", "F"),
+    (StdScale::FSharp4, "key-sharp", "F#"),
+    (StdScale::G4, "key", "G"),
+    (StdScale::GSharp4, "key-sharp", "G#"),
+    (StdScale::A4, "key", "A"),
+    (StdScale::BFlat4, "key-sharp", "Bb"),
+    (StdScale::B4, "key", "B"),
+];
 
 #[component]
 pub fn Keys() -> Element {
     let mut wave_type = use_signal(|| Waveform::Sine);
     let mut audio = use_context::<Signal<AudioManager>>();  
+    let mut active_notes = use_signal(|| HashSet::<StdScale>::new());  
     let mut handle_playnote = move |note: StdScale, sustain: Option<f32>| {
             audio.write().start_note(note, Some(*wave_type.read()),sustain);
+        active_notes.write().insert(note);  
     };
- 
+
     let mut handle_stopnote = move |note: StdScale| {
           audio.write().stop_note(note);
+
+        active_notes.write().remove(&note);  
     };
    
    
@@ -76,86 +96,23 @@ pub fn Keys() -> Element {
                         }
                     }
                 },
-
-                div {
-                    class: "key",
-                    onclick: move |_event| { handle_playnote(StdScale::C4, Some(0.5)) },
-                    p { "C" }
-                }
-                div {
-                    class: "key-sharp",
-                    onclick: move |_event| { handle_playnote(StdScale::CSharp4, Some(0.5)) },
-                    p { "C#" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::D4, Some(0.5));
-                    },
-                    p { "D" }
-                }
-                div {
-                    class: "key-sharp",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::DSharp4, Some(0.5));
-                    },
-                    p { "D#" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::E4, Some(0.5));
-                    },
-                    p { "E" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::F4, Some(0.5));
-                    },
-                    p { "F" }
-                }
-                div {
-                    class: "key-sharp",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::FSharp4, Some(0.5));
-                    },
-                    p { "F#" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::G4, Some(0.5));
-                    },
-                    p { "G" }
-                }
-                div {
-                    class: "key-sharp",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::GSharp4, Some(0.5));
-                    },
-                    p { "G#" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::A4, Some(0.5));
-                    },
-                    p { "A" }
-                }
-                div {
-                    class: "key-sharp",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::BFlat4, Some(0.5));
-                    },
-                    p { "Bb" }
-                }
-                div {
-                    class: "key",
-                    onclick: move |_event| {
-                        handle_playnote(StdScale::B4, Some(0.5));
-                    },
-                    p { "B" }
+                {
+                    PIANO_KEYS
+                        .iter()
+                        .map(|(note, class, label)| {
+                            let is_active = active_notes.read().contains(note);
+                            let active_class = if is_active { " active" } else { "" };
+                            rsx! {
+                                div {
+                                    key: "{label}",
+                                    class: "{class}{active_class}",
+                                    onmousedown: move |_| handle_playnote(*note, Some(0.5)),
+                                    onmouseup: move |_| handle_stopnote(*note),
+                                    onmouseleave: move |_| handle_stopnote(*note),
+                                    p { "{label}" }
+                                }
+                            }
+                        })
                 }
             }
         }

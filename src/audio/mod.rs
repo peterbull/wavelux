@@ -92,7 +92,9 @@ impl AudioManager {
         let notes = HashMap::new();
         Self { stream, notes }
     }
-
+    pub fn is_note_playing(&self, note: &StdScale) -> bool {
+      self.notes.contains_key(note)
+    } 
  
     pub fn create_source(&self, frequency: f32, wave_type: &Waveform) -> Box<dyn Source<Item = f32> + Send> {
         match wave_type {

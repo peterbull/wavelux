@@ -61,6 +61,10 @@ body {
   border-color: var(--shadow-deep);
 }
 
+.key.active {
+  background-color: blue;
+}
+
 .key p {
   text-align: center;
   color: black;
