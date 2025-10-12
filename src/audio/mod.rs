@@ -111,11 +111,6 @@ impl AudioManager {
                     .fade_in(Duration::from_millis(10))
                     .amplify(0.15)
             ),
-            Waveform::Triangle => Box::new(
-                        Pink::new(frequency)
-                            .fade_in(Duration::from_millis(10))
-                            .amplify(0.15)
-            ),
         }
     }
 
