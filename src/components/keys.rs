@@ -1,21 +1,44 @@
 use dioxus::prelude::*;
 use crate::{
-    audio::{start_note, StdScale, Waveform},
+    audio::{AudioManager, StdScale, Waveform},
     components::ToggleButton,
 };
+
+
+fn key_to_note(key: &str) -> Option<StdScale> {
+    match key {
+        "a" => Some(StdScale::C4),
+        "s" => Some(StdScale::D4),
+        "d" => Some(StdScale::E4),
+        "f" => Some(StdScale::F4),
+        "g" => Some(StdScale::G4),
+        "h" => Some(StdScale::A4),
+        "j" => Some(StdScale::B4),
+        "k" => Some(StdScale::C5),
+        "l" => Some(StdScale::D5),
+        "w" => Some(StdScale::CSharp4),
+        "e" => Some(StdScale::DSharp4),
+        "t" => Some(StdScale::FSharp4),
+        "y" => Some(StdScale::GSharp4),
+        "u" => Some(StdScale::BFlat4),
+        _ => None,
+    }
+}
+
+
 #[component]
 pub fn Keys() -> Element {
     let mut wave_type = use_signal(|| Waveform::Sine);
-    let audio = use_resource(|| async {
-        let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-            .expect("open default audio stream");
-        Ok::<_, Box<dyn std::error::Error>>(stream_handle)
-    });
-    let handle_keydown = move |note: StdScale| {
-        if let Some(Ok(stream_handle)) = audio.read().as_ref() {
-            start_note(&stream_handle, note, Some(0.5), Some(*wave_type.read()));
-        }
+    let mut audio = use_context::<Signal<AudioManager>>();  
+    let mut handle_playnote = move |note: StdScale| {
+            audio.write().start_note(note, Some(*wave_type.read()));
     };
+ 
+  let mut handle_stopnote = move |note: StdScale| {
+          audio.write().stop_note(note);
+    };
+   
+   
     rsx! {
         div { class: "keyboard-container",
             div { id: "controls",
@@ -36,107 +59,100 @@ pub fn Keys() -> Element {
                 id: "keys",
                 tabindex: "0",
                 onkeydown: move |event| {
-                    let key = event.key();
-                    match key {
-                        Key::Character(ch) => {
-                            match ch.as_str() {
-                                "a" => handle_keydown(StdScale::C4),
-                                "s" => handle_keydown(StdScale::D4),
-                                "d" => handle_keydown(StdScale::E4),
-                                "f" => handle_keydown(StdScale::F4),
-                                "g" => handle_keydown(StdScale::G4),
-                                "h" => handle_keydown(StdScale::A4),
-                                "j" => handle_keydown(StdScale::B4),
-                                "k" => handle_keydown(StdScale::C5),
-                                "l" => handle_keydown(StdScale::D5),
-                                "w" => handle_keydown(StdScale::CSharp4),
-                                "e" => handle_keydown(StdScale::DSharp4),
-                                "t" => handle_keydown(StdScale::FSharp4),
-                                "y" => handle_keydown(StdScale::GSharp4),
-                                "u" => handle_keydown(StdScale::BFlat4),
-                                _ => println!("other char"),
-                            }
+                    if event.is_auto_repeating() {
+                        return;
+                    }
+                    if let Key::Character(ch) = event.key() {
+                        if let Some(note) = key_to_note(ch.as_str()) {
+                            handle_playnote(note);
                         }
-                        _ => println!("other key"),
                     }
                 },
+                onkeyup: move |event: Event<KeyboardData>| {
+                    if let Key::Character(ch) = event.key() {
+                        if let Some(note) = key_to_note(ch.as_str()) {
+                            handle_stopnote(note);
+                        }
+                    }
+                },
+
                 div {
                     class: "key",
-                    onclick: move |_event| { handle_keydown(StdScale::C4) },
+                    onclick: move |_event| { handle_playnote(StdScale::C4) },
                     p { "C" }
                 }
                 div {
                     class: "key-sharp",
-                    onclick: move |_event| { handle_keydown(StdScale::CSharp4) },
+                    onclick: move |_event| { handle_playnote(StdScale::CSharp4) },
                     p { "C#" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::D4);
+                        handle_playnote(StdScale::D4);
                     },
                     p { "D" }
                 }
                 div {
                     class: "key-sharp",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::DSharp4);
+                        handle_playnote(StdScale::DSharp4);
                     },
                     p { "D#" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::E4);
+                        handle_playnote(StdScale::E4);
                     },
                     p { "E" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::F4);
+                        handle_playnote(StdScale::F4);
                     },
                     p { "F" }
                 }
                 div {
                     class: "key-sharp",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::FSharp4);
+                        handle_playnote(StdScale::FSharp4);
                     },
                     p { "F#" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::G4);
+                        handle_playnote(StdScale::G4);
                     },
                     p { "G" }
                 }
                 div {
                     class: "key-sharp",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::GSharp4);
+                        handle_playnote(StdScale::GSharp4);
                     },
                     p { "G#" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::A4);
+                        handle_playnote(StdScale::A4);
                     },
                     p { "A" }
                 }
                 div {
                     class: "key-sharp",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::BFlat4);
+                        handle_playnote(StdScale::BFlat4);
                     },
                     p { "Bb" }
                 }
                 div {
                     class: "key",
                     onclick: move |_event| {
-                        handle_keydown(StdScale::B4);
+                        handle_playnote(StdScale::B4);
                     },
                     p { "B" }
                 }

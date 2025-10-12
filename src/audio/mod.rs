@@ -1,9 +1,9 @@
-use rodio::{source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration}, OutputStream};
-use std::time::Duration;
+use rodio::{mixer, source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration}, OutputStream, Sink};
+use std::{collections::HashMap, thread::{self, sleep}, time::Duration};
 use rand::{self, Rng};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
-#[derive(Debug, EnumIter)]
+#[derive(Debug, EnumIter, PartialEq, Eq, Hash)]
 pub enum StdScale {
     C4,
     CSharp4,
@@ -67,17 +67,41 @@ pub enum Waveform {
   Saw
 }
 
-
-pub fn start_note(stream_handle: &OutputStream, note: StdScale, sustain: Option<f32>, wave_type: Option<Waveform>) {
-    let sustain = sustain.unwrap_or(0.25);
-    let wave_type = wave_type.unwrap_or(Waveform::Sine);
-    let source: Box<dyn Source<Item = f32> + Send> =  match wave_type {
-    Waveform::Sine => Box::new(SineWave::new(note.frequency())
-        .take_duration(Duration::from_secs_f32(sustain))
-        .amplify(0.5)),
-    Waveform::Saw => Box::new(SawtoothWave::new(note.frequency())
-        .take_duration(Duration::from_secs_f32(sustain))
-        .amplify(0.5)),
-    };
-  stream_handle.mixer().add(source)
+pub struct AudioManager {
+    notes: HashMap<StdScale, Sink>,
+    stream: OutputStream
 }
+
+impl AudioManager {
+    pub fn new() -> Self {
+        let stream = rodio::OutputStreamBuilder::open_default_stream().unwrap();
+        let notes = HashMap::new();
+        Self { stream, notes }
+    }
+
+    pub fn start_note(&mut self, note: StdScale,  wave_type: Option<Waveform>) {
+        let sink = Sink::connect_new(&self.stream.mixer());
+        let wave_type = wave_type.unwrap_or(Waveform::Sine);
+        let source: Box<dyn Source<Item = f32> + Send> = match wave_type {
+            Waveform::Sine => Box::new(SineWave::new(note.frequency())
+                .amplify(0.2)),
+            Waveform::Saw => Box::new(SawtoothWave::new(note.frequency())
+                .amplify(0.2)),
+        };
+        println!("adding source ___________________________________");
+        sink.append(source);
+        if let Some(old_sink) = self.notes.insert(note, sink) {
+            old_sink.stop();
+        }
+    }
+    pub fn stop_note(&mut self, note: StdScale) {
+    if let Some(sink) = self.notes.get(&note) {
+      sink.stop()
+    }
+  }
+}
+
+
+
+
+

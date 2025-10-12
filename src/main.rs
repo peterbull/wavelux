@@ -1,10 +1,11 @@
-use audio::{start_note, StdScale};
 use components::{Hero, Keys};
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 mod audio;
 mod components;
 use dioxus_desktop::{Config, WindowBuilder};
+use crate::audio::AudioManager;
+
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 fn main() {
     dioxus::launch(App);
@@ -16,6 +17,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     println!("Hello, world!");
+    use_context_provider(|| Signal::new(AudioManager::new()));
     rsx! {
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         Keys {}
