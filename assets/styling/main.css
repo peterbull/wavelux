@@ -65,6 +65,10 @@ body {
   background-color: blue;
 }
 
+.key-sharp.active {
+  background-color: grey;
+}
+
 .key p {
   text-align: center;
   color: black;

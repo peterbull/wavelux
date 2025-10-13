@@ -1,3 +1,4 @@
+use core::fmt;
 use std::collections::{hash_set, HashSet};
 
 use dioxus::prelude::*;
@@ -5,6 +6,28 @@ use crate::{
     audio::{AudioManager, StdScale, Waveform},
     components::ToggleButton,
 };
+
+pub enum KeyType {
+  White,
+  Black,
+}
+impl KeyType {
+  pub const fn class(&self) -> &str {
+  match self {
+      KeyType::White => "key",
+      KeyType::Black => "key-sharp",
+    }
+  }
+}
+impl fmt::Display for KeyType {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+     match self {
+      KeyType::White => write!(f, "{}", self.class()),
+      KeyType::Black => write!(f, "{}", self.class()) 
+    } 
+  }
+}
+
 
 
 fn key_to_note(key: &str) -> Option<StdScale> {
@@ -27,19 +50,21 @@ fn key_to_note(key: &str) -> Option<StdScale> {
     }
 }
 
-const PIANO_KEYS: &[(StdScale, &str, &str)] = &[
-    (StdScale::C4, "key", "C"),
-    (StdScale::CSharp4, "key-sharp", "C#"),
-    (StdScale::D4, "key", "D"),
-    (StdScale::DSharp4, "key-sharp", "D#"),
-    (StdScale::E4, "key", "E"),
-    (StdScale::F4, "key", "F"),
-    (StdScale::FSharp4, "key-sharp", "F#"),
-    (StdScale::G4, "key", "G"),
-    (StdScale::GSharp4, "key-sharp", "G#"),
-    (StdScale::A4, "key", "A"),
-    (StdScale::BFlat4, "key-sharp", "Bb"),
-    (StdScale::B4, "key", "B"),
+
+
+const PIANO_KEYS: &[(StdScale, KeyType)] = &[
+    (StdScale::C4, KeyType::White),
+    (StdScale::CSharp4, KeyType::Black),
+    (StdScale::D4, KeyType::White),
+    (StdScale::DSharp4, KeyType::Black),
+    (StdScale::E4, KeyType::White),
+    (StdScale::F4, KeyType::White),
+    (StdScale::FSharp4, KeyType::Black),
+    (StdScale::G4, KeyType::White),
+    (StdScale::GSharp4, KeyType::Black),
+    (StdScale::A4, KeyType::White),
+    (StdScale::BFlat4, KeyType::Black),
+    (StdScale::B4, KeyType::White),
 ];
 
 #[component]
@@ -99,17 +124,18 @@ pub fn Keys() -> Element {
                 {
                     PIANO_KEYS
                         .iter()
-                        .map(|(note, class, label)| {
+                        .map(|(note, class)| {
                             let is_active = active_notes.read().contains(note);
                             let active_class = if is_active { " active" } else { "" };
+                            let note_name = note.to_string();
                             rsx! {
                                 div {
-                                    key: "{label}",
+                                    key: "{note_name}",
                                     class: "{class}{active_class}",
                                     onmousedown: move |_| handle_playnote(*note, Some(0.5)),
                                     onmouseup: move |_| handle_stopnote(*note),
                                     onmouseleave: move |_| handle_stopnote(*note),
-                                    p { "{label}" }
+                                    p { "{note_name}" }
                                 }
                             }
                         })

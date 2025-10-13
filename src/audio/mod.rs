@@ -31,8 +31,39 @@ pub enum StdScale {
     BFlat5,
     B5,
 }
+
+impl fmt::Display for StdScale {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StdScale::C4 => write!(f, "C4"),
+            StdScale::CSharp4 => write!(f, "C#4"),
+            StdScale::D4 => write!(f, "D4"),
+            StdScale::DSharp4 => write!(f, "D#4"),
+            StdScale::E4 => write!(f, "E4"),
+            StdScale::F4 => write!(f, "F4"),
+            StdScale::FSharp4 => write!(f, "F#4"),
+            StdScale::G4 => write!(f, "G4"),
+            StdScale::GSharp4 => write!(f, "G#4"),
+            StdScale::A4 => write!(f, "A4"),
+            StdScale::BFlat4 => write!(f, "Bb4"),
+            StdScale::B4 => write!(f, "B4"),
+            StdScale::C5 => write!(f, "C5"),
+            StdScale::CSharp5 => write!(f, "C#5"),
+            StdScale::D5 => write!(f, "D5"),
+            StdScale::DSharp5 => write!(f, "D#5"),
+            StdScale::E5 => write!(f, "E5"),
+            StdScale::F5 => write!(f, "F5"),
+            StdScale::FSharp5 => write!(f, "F#5"),
+            StdScale::G5 => write!(f, "G5"),
+            StdScale::GSharp5 => write!(f, "G#5"),
+            StdScale::A5 => write!(f, "A5"),
+            StdScale::BFlat5 => write!(f, "Bb5"),
+            StdScale::B5 => write!(f, "B5"),
+        }
+    }
+}
 impl StdScale {
-    pub fn frequency(&self) -> f32 {
+    pub const fn frequency(&self) -> f32 {
         match self {
             StdScale::C4 => 261.63,
             StdScale::CSharp4 => 277.18,
