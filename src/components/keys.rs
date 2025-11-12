@@ -90,11 +90,11 @@ pub fn Keys() -> Element {
                 ToggleButton {}
                 button {
                     onclick: move |_event| {
-                        let current = *wave_type.read();
                         let new_wave = match *wave_type.read() {
                             Waveform::Sine => Waveform::Saw,
                             Waveform::Saw => Waveform::Triangle,
-                            Waveform::Triangle => Waveform::Sine,
+                            Waveform::Triangle => Waveform::Square,
+                            Waveform::Square => Waveform::Sine,
                         };
                         wave_type.set(new_wave);
                     },

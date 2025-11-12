@@ -1,7 +1,16 @@
-use rodio::{mixer, source::{Amplify, SawtoothWave, SineWave, Source, TakeDuration, TriangleWave}, OutputStream, Sink};
 use core::fmt;
-use std::{collections::HashMap, fmt::Formatter, thread::{self, sleep}, time::Duration};
 use rand::{self, Rng};
+use rodio::{
+    mixer,
+    source::{Amplify, SawtoothWave, SineWave, Source, SquareWave, TakeDuration, TriangleWave},
+    OutputStream, Sink,
+};
+use std::{
+    collections::HashMap,
+    fmt::Formatter,
+    thread::{self, sleep},
+    time::Duration,
+};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 #[derive(Debug, EnumIter, PartialEq, Eq, Hash, Clone, Copy)]
@@ -93,28 +102,27 @@ impl StdScale {
     }
 }
 
-
 #[derive(Debug, EnumIter, Copy, Clone)]
 pub enum Waveform {
-  Sine,
-  Saw,
-  Triangle,
+    Sine,
+    Saw,
+    Triangle,
+    Square,
 }
 impl fmt::Display for Waveform {
-  fn fmt(&self, f: &mut fmt::Formatter)-> fmt::Result {
-    match self {
-      Waveform::Sine => write!(f, "Sine"),
-      Waveform::Saw => write!(f,"Saw"),
-      Waveform::Triangle => write!(f,"Triangle"),
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Waveform::Sine => write!(f, "Sine"),
+            Waveform::Saw => write!(f, "Saw"),
+            Waveform::Triangle => write!(f, "Triangle"),
+            Waveform::Square => write!(f, "Square"),
+        }
     }
-  }
-
 }
-
 
 pub struct AudioManager {
     notes: HashMap<StdScale, (Waveform, Sink)>,
-    stream: OutputStream
+    stream: OutputStream,
 }
 
 impl AudioManager {
@@ -124,36 +132,50 @@ impl AudioManager {
         Self { stream, notes }
     }
     pub fn is_note_playing(&self, note: &StdScale) -> bool {
-      self.notes.contains_key(note)
-    } 
- 
-    pub fn create_source(&self, frequency: f32, wave_type: &Waveform) -> Box<dyn Source<Item = f32> + Send> {
+        self.notes.contains_key(note)
+    }
+
+    pub fn create_source(
+        &self,
+        frequency: f32,
+        wave_type: &Waveform,
+    ) -> Box<dyn Source<Item = f32> + Send> {
         match wave_type {
             Waveform::Sine => Box::new(
                 SineWave::new(frequency)
                     .fade_in(Duration::from_millis(10))
-                    .amplify(0.15)
+                    .amplify(0.15),
             ),
             Waveform::Saw => Box::new(
                 SawtoothWave::new(frequency)
                     .fade_in(Duration::from_millis(10))
-                    .amplify(0.15)
+                    .amplify(0.15),
             ),
             Waveform::Triangle => Box::new(
                 TriangleWave::new(frequency)
                     .fade_in(Duration::from_millis(10))
-                    .amplify(0.15)
+                    .amplify(0.15),
+            ),
+            Waveform::Square => Box::new(
+                SquareWave::new(frequency)
+                    .fade_in(Duration::from_millis(10))
+                    .amplify(0.15),
             ),
         }
     }
 
-    pub fn start_note(&mut self, note: StdScale,  wave_type: Option<Waveform>, sustain: Option<f32> ){
+    pub fn start_note(
+        &mut self,
+        note: StdScale,
+        wave_type: Option<Waveform>,
+        sustain: Option<f32>,
+    ) {
         let wave_type = wave_type.unwrap_or(Waveform::Sine);
-        let frequency = note.frequency(); 
+        let frequency = note.frequency();
         let mut source = self.create_source(frequency, &wave_type);
         let sink = Sink::connect_new(&self.stream.mixer());
         if let Some(duration) = sustain {
-          source = Box::new(source.take_duration(Duration::from_secs_f32(duration)))
+            source = Box::new(source.take_duration(Duration::from_secs_f32(duration)))
         }
         println!("adding source ___________________________________");
         sink.append(source);
@@ -162,13 +184,8 @@ impl AudioManager {
         }
     }
     pub fn stop_note(&mut self, note: StdScale) {
-      if let Some((wave_type, sink)) = self.notes.get(&note) {
-        sink.stop();
-      }
-  }
+        if let Some((wave_type, sink)) = self.notes.get(&note) {
+            sink.stop();
+        }
+    }
 }
-
-
-
-
-
