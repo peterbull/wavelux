@@ -3,8 +3,8 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 mod audio;
 mod components;
-use dioxus_desktop::{Config, WindowBuilder};
 use crate::audio::AudioManager;
+use dioxus_desktop::{Config, WindowBuilder};
 
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 fn main() {

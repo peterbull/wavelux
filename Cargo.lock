@@ -5032,6 +5032,7 @@ dependencies = [
 name = "wavelux"
 version = "0.1.0"
 dependencies = [
+ "cpal",
  "dioxus",
  "dioxus-desktop",
  "rand 0.9.2",

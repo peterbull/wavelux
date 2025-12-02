@@ -1,34 +1,32 @@
 use core::fmt;
 use std::collections::{hash_set, HashSet};
 
-use dioxus::prelude::*;
 use crate::{
     audio::{AudioManager, StdScale, Waveform},
     components::ToggleButton,
 };
+use dioxus::prelude::*;
 
 pub enum KeyType {
-  White,
-  Black,
+    White,
+    Black,
 }
 impl KeyType {
-  pub const fn class(&self) -> &str {
-  match self {
-      KeyType::White => "key",
-      KeyType::Black => "key-sharp",
+    pub const fn class(&self) -> &str {
+        match self {
+            KeyType::White => "key",
+            KeyType::Black => "key-sharp",
+        }
     }
-  }
 }
 impl fmt::Display for KeyType {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-     match self {
-      KeyType::White => write!(f, "{}", self.class()),
-      KeyType::Black => write!(f, "{}", self.class()) 
-    } 
-  }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            KeyType::White => write!(f, "{}", self.class()),
+            KeyType::Black => write!(f, "{}", self.class()),
+        }
+    }
 }
-
-
 
 fn key_to_note(key: &str) -> Option<StdScale> {
     match key {
@@ -50,8 +48,6 @@ fn key_to_note(key: &str) -> Option<StdScale> {
     }
 }
 
-
-
 const PIANO_KEYS: &[(StdScale, KeyType)] = &[
     (StdScale::C4, KeyType::White),
     (StdScale::CSharp4, KeyType::Black),
@@ -70,20 +66,21 @@ const PIANO_KEYS: &[(StdScale, KeyType)] = &[
 #[component]
 pub fn Keys() -> Element {
     let mut wave_type = use_signal(|| Waveform::Sine);
-    let mut audio = use_context::<Signal<AudioManager>>();  
-    let mut active_notes = use_signal(|| HashSet::<StdScale>::new());  
+    let mut audio = use_context::<Signal<AudioManager>>();
+    let mut active_notes = use_signal(|| HashSet::<StdScale>::new());
     let mut handle_playnote = move |note: StdScale, sustain: Option<f32>| {
-            audio.write().start_note(note, Some(*wave_type.read()),sustain);
-        active_notes.write().insert(note);  
+        audio
+            .write()
+            .start_note(note, Some(*wave_type.read()), sustain);
+        active_notes.write().insert(note);
     };
 
     let mut handle_stopnote = move |note: StdScale| {
-          audio.write().stop_note(note);
+        audio.write().stop_note(note);
 
-        active_notes.write().remove(&note);  
+        active_notes.write().remove(&note);
     };
-   
-   
+
     rsx! {
         div { class: "keyboard-container",
             div { id: "controls",

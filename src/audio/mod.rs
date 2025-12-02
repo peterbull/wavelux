@@ -1,18 +1,13 @@
 use core::fmt;
-use rand::{self, Rng};
+use rand::{self};
+use rand::{random_range, Rng};
 use rodio::{
-    mixer,
-    source::{Amplify, SawtoothWave, SineWave, Source, SquareWave, TakeDuration, TriangleWave},
+    source::{SawtoothWave, SineWave, Source, SquareWave, TriangleWave},
     OutputStream, Sink,
 };
-use std::{
-    collections::HashMap,
-    fmt::Formatter,
-    thread::{self, sleep},
-    time::Duration,
-};
-use strum::IntoEnumIterator;
+use std::{collections::HashMap, fmt::Formatter, time::Duration};
 use strum_macros::EnumIter;
+
 #[derive(Debug, EnumIter, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum StdScale {
     C4,
