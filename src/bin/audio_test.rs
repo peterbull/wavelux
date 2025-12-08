@@ -1,12 +1,11 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Data, FromSample, Sample, SampleFormat};
-use rand::{random_range, Rng};
+use cpal::{FromSample, Sample};
+use rand::random_range;
 
 fn write_test_audio<T: Sample>(data: &mut [T], _: &cpal::OutputCallbackInfo)
 where
     T: Sample + FromSample<f32>,
 {
-    let rng = rand::thread_rng();
     for sample in data.iter_mut() {
         let noise_value: f32 = random_range(-0.1..0.1);
         *sample = Sample::from_sample(noise_value);
@@ -31,7 +30,8 @@ fn main() {
             &config,
             write_test_audio::<f32>,
             move |err| {
-                //react to error
+                //react to error;
+                println!("white noise error: {:?}", err);
             },
             None, //blocking, alt -> Some(Duration)=timeout
         )
