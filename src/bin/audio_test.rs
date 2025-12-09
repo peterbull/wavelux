@@ -12,7 +12,7 @@ where
     }
 }
 
-fn main() {
+fn test_output() {
     let host = cpal::default_host();
     let device = host
         .default_output_device()
@@ -25,6 +25,7 @@ fn main() {
         .expect("no supported config?")
         .with_max_sample_rate();
     let config = supported_config.config();
+
     let stream = device
         .build_output_stream(
             &config,
@@ -40,4 +41,60 @@ fn main() {
     println!("playing sound press enter to stop");
     let mut input = String::new();
     std::io::stdin().read_line(&mut input);
+}
+
+fn main() {
+    let host = cpal::default_host();
+    let input_devices: Vec<_> = host
+        .input_devices()
+        .unwrap()
+        .filter_map(|d| d.name().ok())
+        .collect::<Vec<_>>();
+    println!("input devices: {:?}", input_devices);
+
+    // let device = host
+    //     .default_input_device()
+    //     .expect("no output device available");
+    //
+    let device = match host.input_devices().unwrap().find(|device| {
+        device
+            .name()
+            .map(|device_name| device_name == String::from("USB Audio")) // usb aux, guitar etc
+            .unwrap_or(false)
+    }) {
+        Some(device) => device,
+        None => host.default_input_device().expect("no default device"),
+    };
+
+    println!("current device: {:?}", device.name().unwrap());
+    let mut supported_configs_range = device
+        .supported_input_configs()
+        .expect("error while querying configs");
+    let supported_config = supported_configs_range
+        .next()
+        .expect("no supported config?")
+        .with_max_sample_rate();
+    let config = supported_config.config();
+
+    let stream = device
+        .build_input_stream(
+            &config,
+            move |data: &[f32], _: &cpal::InputCallbackInfo| {
+                if !data.is_empty() {
+                    println!("data: {:?}", &data[0..10]);
+                }
+            },
+            {
+                move |err| {
+                    //react to error;
+                    println!("input stream error: {:?}", err);
+                }
+            },
+            None, //blocking, alt -> Some(Duration)=timeout
+        )
+        .unwrap();
+    stream.play().unwrap();
+    println!("playing sound press enter to stop");
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).unwrap();
 }
