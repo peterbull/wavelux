@@ -76,12 +76,16 @@ fn main() {
         .with_max_sample_rate();
     let config = supported_config.config();
 
+    println!("default sample rate: {:?}", config.sample_rate);
+    println!("default channels: {:?}", config.channels);
+    println!("default buffer size: {:?}", config.buffer_size);
+
     let stream = device
         .build_input_stream(
             &config,
             move |data: &[f32], _: &cpal::InputCallbackInfo| {
                 if !data.is_empty() {
-                    println!("data: {:?}", &data[0..10]);
+                    // println!("data: {:?}", &data[0..10]);
                 }
             },
             {
