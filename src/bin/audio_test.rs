@@ -51,12 +51,13 @@ fn main() {
         .filter_map(|d| d.name().ok())
         .collect::<Vec<_>>();
     println!("input devices: {:?}", input_devices);
-
-    // let device = host
-    //     .default_input_device()
-    //     .expect("no output device available");
-    //
-    let device = match host.input_devices().unwrap().find(|device| {
+    let output_devices = host
+        .output_devices()
+        .unwrap()
+        .filter_map(|d| d.name().ok())
+        .collect::<Vec<_>>();
+    println!("output devices: {:?}", output_devices);
+    let input_device = match host.input_devices().unwrap().find(|device| {
         device
             .name()
             .map(|device_name| device_name == String::from("USB Audio")) // usb aux, guitar etc
@@ -66,23 +67,25 @@ fn main() {
         None => host.default_input_device().expect("no default device"),
     };
 
-    println!("current device: {:?}", device.name().unwrap());
-    let mut supported_configs_range = device
+    println!("current device: {:?}", input_device.name().unwrap());
+
+    let mut supported_input_configs_range = input_device
         .supported_input_configs()
         .expect("error while querying configs");
-    let supported_config = supported_configs_range
+
+    let supported_input_config = supported_input_configs_range
         .next()
         .expect("no supported config?")
         .with_max_sample_rate();
-    let config = supported_config.config();
+    let input_config = supported_input_config.config();
 
-    println!("default sample rate: {:?}", config.sample_rate);
-    println!("default channels: {:?}", config.channels);
-    println!("default buffer size: {:?}", config.buffer_size);
+    println!("default input sample rate: {:?}", input_config.sample_rate);
+    println!("default input channels: {:?}", input_config.channels);
+    println!("default input buffer size: {:?}", input_config.buffer_size);
 
-    let stream = device
+    let stream = input_device
         .build_input_stream(
-            &config,
+            &input_config,
             move |data: &[f32], _: &cpal::InputCallbackInfo| {
                 if !data.is_empty() {
                     // println!("data: {:?}", &data[0..10]);
