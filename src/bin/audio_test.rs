@@ -115,6 +115,15 @@ fn main() {
     println!("default input sample rate: {:?}", input_config.sample_rate);
     println!("default input channels: {:?}", input_config.channels);
     println!("default input buffer size: {:?}", input_config.buffer_size);
+    println!(
+        "default output sample rate: {:?}",
+        output_config.sample_rate
+    );
+    println!("default output channels: {:?}", output_config.channels);
+    println!(
+        "default output buffer size: {:?}",
+        output_config.buffer_size
+    );
 
     let audio_buffer = Arc::new(Mutex::new(VecDeque::<f32>::new()));
     let buffer_clone = audio_buffer.clone();
@@ -144,8 +153,20 @@ fn main() {
             &output_config,
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                 let mut buffer = audio_buffer.lock().unwrap();
-                for sample in data.iter_mut() {
-                    *sample = buffer.pop_front().unwrap_or(0.0);
+                if input_config.channels == 1 && output_config.channels == 2 {
+                    for chunk in data.chunks_mut(2) {
+                        if let Some(mono_sample) = buffer.pop_front() {
+                            chunk[0] = mono_sample;
+                            chunk[1] = mono_sample;
+                        } else {
+                            chunk[0] = 0.0;
+                            chunk[1] = 0.0;
+                        }
+                    }
+                } else {
+                    for sample in data.iter_mut() {
+                        *sample = buffer.pop_front().unwrap_or(0.0);
+                    }
                 }
             },
             {
