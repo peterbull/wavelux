@@ -1,4 +1,4 @@
-use components::{Hero, Keys};
+use components::Keys;
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 mod audio;
